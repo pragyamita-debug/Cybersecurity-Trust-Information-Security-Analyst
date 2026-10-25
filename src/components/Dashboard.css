@@ -54,17 +54,51 @@ main { overflow-x: clip; }
 
 /* the data strands (drawn by FlowLines) */
 .flows { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; overflow: visible; }
-.flow { fill: none; stroke-width: 1.1; transition: opacity 0.3s, stroke-width 0.3s; }
+
+/* faint permanent structure */
+.flow { fill: none; stroke-width: 1; opacity: 0.32; transition: opacity 0.3s, stroke-width 0.3s; }
 .flow--blue { stroke: #3d9bff; }
 .flow--orange { stroke: #ff9a3d; }
-.flow.is-hot { opacity: 0.95 !important; stroke-width: 1.8; }
-.pulse { fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 7 93; animation: pulse-run 3.6s linear infinite; }
-.pulse--blue { stroke: #8fd0ff; }
-.pulse--orange { stroke: #ffc477; animation-direction: reverse; }
+.flow--filler { opacity: 0.22; stroke-width: 0.8; }
+.flow--root, .flow--bridge { opacity: 0.26; stroke-width: 0.8; }
+.flow.is-flicker { animation: flicker 2.4s steps(1, end) infinite; }
+@keyframes flicker { 0%, 100% { opacity: 0.32; } 12% { opacity: 0.85; } 16% { opacity: 0.18; } 22% { opacity: 0.7; } 30% { opacity: 0.3; } 61% { opacity: 0.6; } 64% { opacity: 0.25; } }
+.flow.is-hot { opacity: 0.95 !important; stroke-width: 1.6; animation: none; }
+
+/* roots growing out of the hub: draw → hold → fade → grow again (8s cycle, staggered by FlowLines) */
+.grow { fill: none; stroke-width: 1.3; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: grow 8s cubic-bezier(0.45, 0, 0.25, 1) infinite; }
+.grow--blue { stroke: #7cc4ff; }
+.grow--orange { stroke: #ffb468; }
+.grow--filler, .grow--root, .grow--bridge { stroke-width: 1; }
+.grow.is-hot { stroke-width: 2.2; }
+@keyframes grow {
+  0% { stroke-dashoffset: 100; opacity: 1; }
+  28% { stroke-dashoffset: 0; opacity: 1; }
+  70% { stroke-dashoffset: 0; opacity: 0.9; }
+  90%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+.pulse { fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 6 94; animation: pulse-run 3.6s linear infinite; }
+.pulse--blue { stroke: #cfeaff; filter: drop-shadow(0 0 3px #3d9bff); animation-direction: reverse; }
+.pulse--orange { stroke: #ffe0b8; filter: drop-shadow(0 0 3px #ff9a3d); }
 .pulse.is-hot { stroke-width: 2.6; stroke-dasharray: 18 82; animation-duration: 1.6s; }
 @keyframes pulse-run { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
-.packet--blue { fill: #cfeaff; filter: drop-shadow(0 0 4px #3d9bff); }
-.packet--orange { fill: #ffe2bd; filter: drop-shadow(0 0 4px #ff9a3d); }
+
+/* blinking nodes at the tips */
+.node { animation: blink 2s ease-in-out infinite; }
+.node--blue { fill: #bfe3ff; filter: drop-shadow(0 0 3px #3d9bff); }
+.node--orange { fill: #ffd2a1; filter: drop-shadow(0 0 3px #ff9a3d); }
+.node.is-hot { animation-duration: 0.6s !important; }
+@keyframes blink { 0%, 100% { opacity: 0.25; } 45% { opacity: 1; } 55% { opacity: 1; } }
+
+.packet--blue { fill: #e6f4ff; filter: drop-shadow(0 0 4px #3d9bff); }
+.packet--orange { fill: #fff0dc; filter: drop-shadow(0 0 4px #ff9a3d); }
+
+/* broken arcs around the hub */
+.arc { fill: none; stroke-width: 1; }
+.arc--0 { stroke: rgba(120, 180, 255, 0.4); stroke-dasharray: 60 18 6 18 30 26; animation: spin 70s linear infinite; }
+.arc--1 { stroke: rgba(255, 170, 100, 0.28); stroke-dasharray: 4 9; animation: spin 110s linear infinite reverse; }
+.arc--2 { stroke: rgba(120, 180, 255, 0.22); stroke-dasharray: 90 40 12 40; animation: spin 150s linear infinite; }
 
 /* ================= intro ================= */
 
@@ -305,8 +339,9 @@ main { overflow-x: clip; }
 @media (prefers-reduced-motion: reduce) {
   .pillar, .outcomes li, .wheel__item, .hub__name { animation: none; opacity: 1; }
   .hub__sun { animation: none; }
-  .hub::before, .hub__ring, .hub__ticks, .wheel__outer, .wheel__run, .trust__run, .trust__lock svg, .pulse, .orbit__track, .map__node, .map__pin i::after, .wheel__center svg { animation: none; }
-  .flows__packets { display: none; }
+  .hub::before, .hub__ring, .hub__ticks, .wheel__outer, .wheel__run, .trust__run, .trust__lock svg, .pulse, .flow, .node, .arc, .orbit__track, .map__node, .map__pin i::after, .wheel__center svg { animation: none; }
+  .flows__packets, .flows__pulse { display: none; }
+  .grow { animation: none; stroke-dashoffset: 0; opacity: 0.8; }
   .cflow__line { stroke-dashoffset: 0; animation: none !important; }
   .map__arc { stroke-dashoffset: 0; animation: none !important; opacity: 0.6; }
 }

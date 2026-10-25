@@ -17,7 +17,7 @@ const firstSentence = (s: string) => (s.match(/^.+?[.!?](\s|$)/)?.[0] ?? s).trim
 
 /* ================= intro (top-left title block) ================= */
 
-function Intro({ resume, isExample, onUpload }: { resume: Resume; isExample: boolean; onUpload: () => void }) {
+function Intro({ resume }: { resume: Resume }) {
   const [role, focus] = splitHeadline(resume.headline);
   const [a, b] = twoLines(role.toUpperCase());
   const [ref, inView] = useInView<HTMLDivElement>(0.2);
@@ -33,15 +33,9 @@ function Intro({ resume, isExample, onUpload }: { resume: Resume; isExample: boo
       <p className="intro__lede">{resume.tagline || firstSentence(resume.summary)}</p>
       <span className="intro__rule" aria-hidden />
       <div className="intro__actions">
-        {isExample ? (
-          <button className="pill pill--sm" onClick={onUpload}>
-            <Icon name="upload" size={15} /> Upload your CV
-          </button>
-        ) : (
-          <a className="pill pill--sm" href={resume.email ? `mailto:${resume.email}` : '#contact'}>
-            <Icon name="mail" size={15} /> Get in touch
-          </a>
-        )}
+        <a className="pill pill--sm" href={resume.email ? `mailto:${resume.email}` : '#contact'}>
+          <Icon name="mail" size={15} /> Get in touch
+        </a>
         <a className="text-link" href="#outcomes">
           See outcomes <Icon name="arrowRight" size={15} />
         </a>
@@ -380,7 +374,7 @@ function CareerFlow({ resume }: { resume: Resume }) {
 
 /* ================= the whole ecosystem ================= */
 
-export function Ecosystem({ resume, isExample, onUpload }: { resume: Resume; isExample: boolean; onUpload: () => void }) {
+export function Ecosystem({ resume }: { resume: Resume }) {
   const root = useRef<HTMLElement>(null);
   const [hot, setHot] = useState<string | null>(null);
 
@@ -402,7 +396,7 @@ export function Ecosystem({ resume, isExample, onUpload }: { resume: Resume; isE
       <FlowLines root={root} hot={hot} />
 
       <div className="eco__col eco__col--left">
-        <Intro resume={resume} isExample={isExample} onUpload={onUpload} />
+        <Intro resume={resume} />
         <Pillars resume={resume} onHot={setHot} />
         {tools.length > 0 && <ListPanel title="Toolkit" rows={tools} side="left" tone="blue" accent="blue" phase={0.5} onHot={setHot} />}
       </div>

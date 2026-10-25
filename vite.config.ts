@@ -7,7 +7,5 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 export default defineConfig(({ mode }) => ({
   base: './',
   plugins: [react(), ...(mode === 'single' ? [viteSingleFile()] : [])],
-  // pdf.js + its worker are big but only load when someone uploads a PDF
-  build: { outDir: mode === 'single' ? 'dist-single' : 'dist', chunkSizeWarningLimit: 2000 },
-  test: { environment: 'node' },
+  build: { outDir: mode === 'single' ? 'dist-single' : 'dist' },
 }));

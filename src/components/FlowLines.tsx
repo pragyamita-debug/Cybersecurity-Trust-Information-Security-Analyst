@@ -179,7 +179,7 @@ function build(anchors: Anchor[], cx: number, cy: number, r: number): { lines: L
   return { lines, nodes };
 }
 
-export function FlowLines({ root, hot }: { root: RefObject<HTMLElement>; hot: string | null }) {
+export function FlowLines({ root, hot, zoom = 1 }: { root: RefObject<HTMLElement>; hot: string | null; zoom?: number }) {
   const [scene, setScene] = useState<Scene | null>(null);
 
   useLayoutEffect(() => {
@@ -191,15 +191,18 @@ export function FlowLines({ root, hot }: { root: RefObject<HTMLElement>; hot: st
       raf = 0;
       const base = el.getBoundingClientRect();
       const core = el.querySelector<HTMLElement>('[data-hub]');
-      // hidden on small screens (the layout stacks and the roots would have nowhere to go)
-      if (!core || core.offsetParent === null || window.innerWidth < 1100) {
+      // only in the three-column layout; on phones it stacks and the roots would have nowhere to go
+      const cols = getComputedStyle(el).gridTemplateColumns.split(' ').length;
+      if (!core || core.offsetParent === null || cols !== 3) {
         setScene(null);
         return;
       }
+      // when the section is zoomed to fit, client rects are in screen px but the SVG draws in layout px
+      const z = base.width / el.offsetWidth || 1;
       const c = core.getBoundingClientRect();
-      const cx = c.left + c.width / 2 - base.left;
-      const cy = c.top + c.height / 2 - base.top;
-      const r = c.width / 2;
+      const cx = (c.left + c.width / 2 - base.left) / z;
+      const cy = (c.top + c.height / 2 - base.top) / z;
+      const r = c.width / 2 / z;
       const anchors: Anchor[] = [];
       el.querySelectorAll<HTMLElement>('[data-flow]').forEach((a, n) => {
         const side = a.dataset.flow as Side;
@@ -208,11 +211,11 @@ export function FlowLines({ root, hot }: { root: RefObject<HTMLElement>; hot: st
           side,
           tone: (a.dataset.tone as Tone) || 'blue',
           key: a.dataset.key || String(n),
-          x: (side === 'left' ? ar.right : side === 'right' ? ar.left : ar.left + ar.width / 2) - base.left,
-          y: (side === 'up' ? ar.bottom : side === 'down' ? ar.top : ar.top + ar.height / 2) - base.top,
+          x: ((side === 'left' ? ar.right : side === 'right' ? ar.left : ar.left + ar.width / 2) - base.left) / z,
+          y: ((side === 'up' ? ar.bottom : side === 'down' ? ar.top : ar.top + ar.height / 2) - base.top) / z,
         });
       });
-      setScene({ w: base.width, h: base.height, cx, cy, r, ...build(anchors, cx, cy, r) });
+      setScene({ w: el.offsetWidth, h: el.offsetHeight, cx, cy, r, ...build(anchors, cx, cy, r) });
     };
 
     const schedule = () => {
@@ -229,7 +232,7 @@ export function FlowLines({ root, hot }: { root: RefObject<HTMLElement>; hot: st
       ro.disconnect();
       window.removeEventListener('resize', schedule);
     };
-  }, [root]);
+  }, [root, zoom]);
 
   if (!scene) return null;
   const { w, h, cx, cy, r, lines, nodes } = scene;

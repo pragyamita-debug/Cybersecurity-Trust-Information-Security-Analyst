@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useCountUp } from '../hooks/useCountUp';
 import { useInView } from '../hooks/useInView';
+import { useFitZoom } from '../hooks/useFitZoom';
 import { useScramble } from '../hooks/useScramble';
 import { describeSkill, iconFor, shortCert, twoLines } from '../lib/security';
 import type { Resume } from '../lib/types';
@@ -377,6 +378,7 @@ function CareerFlow({ resume }: { resume: Resume }) {
 export function Ecosystem({ resume }: { resume: Resume }) {
   const root = useRef<HTMLElement>(null);
   const [hot, setHot] = useState<string | null>(null);
+  const zoom = useFitZoom();
 
   const tools: Row[] = resume.skills.slice(5, 12).map((s, i) => ({ key: `tool-${i}`, icon: iconFor(s, i + 3), label: s }));
   const roles: Row[] = resume.experience.slice(0, 5).map((e, i) => ({
@@ -392,8 +394,8 @@ export function Ecosystem({ resume }: { resume: Resume }) {
   }));
 
   return (
-    <section className="eco wrap" id="overview" ref={root} aria-label="Profile overview">
-      <FlowLines root={root} hot={hot} />
+    <section className="eco wrap" id="overview" ref={root} aria-label="Profile overview" style={zoom !== 1 ? ({ zoom } as CSSProperties) : undefined}>
+      <FlowLines root={root} hot={hot} zoom={zoom} />
 
       <div className="eco__col eco__col--left">
         <Intro resume={resume} />
